@@ -1,0 +1,187 @@
+/**
+ * 指令菜单组件样式
+ */
+
+.action-menu {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.ap-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.ap-label {
+  font-size: 14px;
+  color: #a0a0a0;
+}
+
+.ap-dots {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  justify-content: center;
+}
+
+.ap-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.ap-dot.active {
+  background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+  border-color: #ffd700;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+.ap-value {
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.menu-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #e0e0e0;
+  font-size: 14px;
+}
+
+.menu-item:hover:not(.disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(4px);
+}
+
+.menu-item:active:not(.disabled) {
+  transform: translateX(2px);
+}
+
+.menu-item.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.menu-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+
+.menu-label {
+  flex: 1;
+  text-align: left;
+}
+
+.menu-ap-cost {
+  font-size: 12px;
+  padding: 2px 8px;
+  background: rgba(255, 215, 0, 0.2);
+  border-radius: 4px;
+  color: #ffd700;
+}
+
+.no-selection {
+  padding: 24px;
+  text-align: center;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.no-selection p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.end-turn-button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #4a90d9 0%, #357abd 100%);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.end-turn-button:hover {
+  background: linear-gradient(135deg, #5a9fe9 0%, #458acd 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 144, 217, 0.4);
+}
+
+.end-turn-button:active {
+  transform: translateY(0);
+}
+
+
+/* 存档/读档按钮 - Requirements 11.5, 11.9 */
+.saveload-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.saveload-button {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.saveload-button.save {
+  background: rgba(76, 175, 80, 0.15);
+  color: #81c784;
+  border-color: rgba(76, 175, 80, 0.3);
+}
+
+.saveload-button.save:hover {
+  background: rgba(76, 175, 80, 0.25);
+  border-color: rgba(76, 175, 80, 0.5);
+}
+
+.saveload-button.load {
+  background: rgba(33, 150, 243, 0.15);
+  color: #64b5f6;
+  border-color: rgba(33, 150, 243, 0.3);
+}
+
+.saveload-button.load:hover {
+  background: rgba(33, 150, 243, 0.25);
+  border-color: rgba(33, 150, 243, 0.5);
+}

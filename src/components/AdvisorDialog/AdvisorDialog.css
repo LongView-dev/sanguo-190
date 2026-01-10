@@ -1,0 +1,187 @@
+/**
+ * 军师对话组件样式
+ */
+
+/* 遮罩层 */
+.advisor-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* 对话框主体 */
+.advisor-dialog {
+  background: linear-gradient(135deg, #2d1f1f 0%, #1a1212 100%);
+  border: 2px solid #8b4513;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* 对话框头部 */
+.advisor-dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(90deg, #4a3728 0%, #3d2d22 100%);
+  border-bottom: 1px solid #8b4513;
+}
+
+.advisor-dialog-header h3 {
+  margin: 0;
+  color: #ffd700;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.close-button:hover {
+  color: #fff;
+}
+
+/* 军师选择器 */
+.advisor-selector {
+  padding: 12px 16px;
+  border-bottom: 1px solid #4a3728;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.advisor-selector label {
+  color: #ccc;
+  font-size: 14px;
+}
+
+.advisor-selector select {
+  flex: 1;
+  padding: 6px 10px;
+  background: #1a1212;
+  border: 1px solid #8b4513;
+  border-radius: 4px;
+  color: #ffd700;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.advisor-selector select:focus {
+  outline: none;
+  border-color: #ffd700;
+}
+
+/* 军师信息 */
+.advisor-info {
+  padding: 12px 16px;
+  border-bottom: 1px solid #4a3728;
+}
+
+.advisor-name {
+  color: #ffd700;
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.advisor-description {
+  color: #aaa;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* 建议内容 */
+.advice-content {
+  padding: 20px 16px;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading {
+  color: #ffd700;
+  font-size: 14px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.advice-text {
+  color: #e8e8e8;
+  font-size: 15px;
+  line-height: 1.6;
+  text-align: center;
+  font-style: italic;
+}
+
+.advisor-quote {
+  color: #ffd700;
+  font-size: 24px;
+  font-family: serif;
+  vertical-align: top;
+}
+
+.fallback-notice {
+  color: #888;
+  font-size: 12px;
+  margin-top: 8px;
+  font-style: normal;
+}
+
+.no-advice {
+  color: #888;
+  font-size: 14px;
+}
+
+/* 操作按钮 */
+.advisor-dialog-actions {
+  padding: 12px 16px;
+  border-top: 1px solid #4a3728;
+  display: flex;
+  justify-content: center;
+}
+
+.request-advice-button {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #8b4513 0%, #654321 100%);
+  border: 1px solid #ffd700;
+  border-radius: 4px;
+  color: #ffd700;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.request-advice-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #a0522d 0%, #8b4513 100%);
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+}
+
+.request-advice-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
