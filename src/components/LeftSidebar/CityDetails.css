@@ -8,6 +8,22 @@
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 城市背景图 */
+.city-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.15;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .city-header {
@@ -17,6 +33,8 @@
   margin-bottom: 16px;
   padding-bottom: 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 1;
 }
 
 .city-name {
@@ -46,6 +64,8 @@
 
 .city-resources {
   margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
 }
 
 .resource-row {
@@ -62,11 +82,20 @@
   padding: 8px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 4px;
+  backdrop-filter: blur(4px);
 }
 
 .resource-cell.full-width {
   flex: none;
   width: 100%;
+}
+
+/* 资源图标图片样式 */
+.resource-icon-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .resource-cell .resource-icon {
@@ -117,12 +146,22 @@
 .stationed-generals {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .section-title {
   font-size: 14px;
   color: #a0a0a0;
   margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title .resource-icon-img {
+  width: 20px;
+  height: 20px;
 }
 
 .general-list {
@@ -137,10 +176,42 @@
 .general-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   padding: 8px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 4px;
+  backdrop-filter: blur(4px);
+  transition: background 0.2s ease;
+}
+
+.general-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* 武将头像样式 */
+.general-portrait {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.general-portrait-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #3a3a5c 0%, #2a2a4c 100%);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.general-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .general-name {
@@ -152,7 +223,14 @@
 .general-troops {
   font-size: 12px;
   color: #87ceeb;
-  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.general-troops .resource-icon-img {
+  width: 16px;
+  height: 16px;
 }
 
 .general-stats {
@@ -161,6 +239,7 @@
   padding: 2px 6px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 4px;
+  width: fit-content;
 }
 
 .no-generals {

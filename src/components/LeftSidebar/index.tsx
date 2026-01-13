@@ -99,8 +99,8 @@ export function LeftSidebar({
   // 获取驻守武将
   const stationedGenerals = selectedCityData
     ? selectedCityData.stationedGenerals
-        .map((id) => generals[id])
-        .filter((g): g is General => g !== undefined && g.isAlive)
+      .map((id) => generals[id])
+      .filter((g): g is General => g !== undefined && g.isAlive)
     : [];
 
   // 获取城市势力颜色
@@ -113,6 +113,8 @@ export function LeftSidebar({
       {/* 势力概况 */}
       <FactionOverview
         lordName={lord?.name || playerFaction.name}
+        lordId={playerFaction.lordId}
+        factionId={playerFaction.id}
         totalGold={totalGold}
         totalGrain={totalGrain}
         totalTroops={totalTroops}
