@@ -14,11 +14,11 @@ export function NewsPanel({ events }: NewsPanelProps) {
       case 'battle':
         return '⚔️';
       case 'domestic':
-        return '📊';
-      case 'diplomacy':
-        return '🤝';
-      case 'talent':
-        return '🧑';
+        return '🏛️';
+      case 'disaster':
+        return '🌪️';
+      case 'general':
+        return '🧑‍✈️';
       default:
         return '📜';
     }

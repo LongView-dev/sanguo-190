@@ -2,13 +2,24 @@
  * 行动指令面板 - 像素风格
  */
 
+import type { ActionType } from '../../LeftSidebar/ActionMenu';
+
+interface ActionItem {
+  id: ActionType;
+  icon: string;
+  label: string;
+  cost: number;
+  primary?: boolean;
+}
+
 interface ActionsPanelProps {
   actionPoints: number;
-  onAction: (action: string, cost: number) => void;
+  onAction: (action: ActionType) => void;
   onEndTurn: () => void;
   onSave: () => void;
   onLoad: () => void;
   hasSelectedCity: boolean;
+  isPlayerCity: boolean;
 }
 
 export function ActionsPanel({
@@ -18,17 +29,23 @@ export function ActionsPanel({
   onSave,
   onLoad,
   hasSelectedCity,
+  isPlayerCity,
 }: ActionsPanelProps) {
-  const politicsActions = [
+  const canUseDomestic = hasSelectedCity && isPlayerCity;
+  const canUseEnemyActions = hasSelectedCity && !isPlayerCity;
+
+  const politicsActions: ActionItem[] = [
     { id: 'develop_commerce', icon: '🏪', label: '开发商业', cost: 1 },
     { id: 'develop_agriculture', icon: '🌾', label: '开发农业', cost: 1 },
     { id: 'recruit', icon: '🎖️', label: '征兵', cost: 1 },
     { id: 'search_talent', icon: '🔍', label: '人才探索', cost: 1 },
   ];
 
-  const militaryActions = [{ id: 'campaign', icon: '⚔️', label: '出征', cost: 2, primary: true }];
+  const militaryActions: ActionItem[] = [
+    { id: 'campaign', icon: '⚔️', label: '出征', cost: 2, primary: true },
+  ];
 
-  const specialActions = [
+  const specialActions: ActionItem[] = [
     { id: 'stratagem', icon: '📜', label: '计略', cost: 1 },
     { id: 'view_details', icon: '💬', label: '军师建议', cost: 0 },
   ];
@@ -44,8 +61,8 @@ export function ActionsPanel({
             <button
               key={action.id}
               className="action-btn"
-              disabled={actionPoints < action.cost || !hasSelectedCity}
-              onClick={() => onAction(action.id, action.cost)}
+              disabled={!canUseDomestic || actionPoints < action.cost}
+              onClick={() => onAction(action.id)}
             >
               <span className="icon">{action.icon}</span>
               <span className="label">{action.label}</span>
@@ -62,8 +79,8 @@ export function ActionsPanel({
             <button
               key={action.id}
               className={`action-btn ${action.primary ? 'primary' : ''} danger`}
-              disabled={actionPoints < action.cost || !hasSelectedCity}
-              onClick={() => onAction(action.id, action.cost)}
+              disabled={!canUseDomestic || actionPoints < action.cost}
+              onClick={() => onAction(action.id)}
             >
               <span className="icon">{action.icon}</span>
               <span className="label">{action.label}</span>
@@ -80,8 +97,8 @@ export function ActionsPanel({
             <button
               key={action.id}
               className="action-btn"
-              disabled={action.cost > 0 && actionPoints < action.cost}
-              onClick={() => onAction(action.id, action.cost)}
+              disabled={!canUseEnemyActions || (action.cost > 0 && actionPoints < action.cost)}
+              onClick={() => onAction(action.id)}
             >
               <span className="icon">{action.icon}</span>
               <span className="label">{action.label}</span>

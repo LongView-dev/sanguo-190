@@ -5,11 +5,18 @@
  * Requirements: 1.1, 9.1, 3.5, 11.8
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { GameStateProvider, useGameState } from './store/gameState';
-import { LeftSidebar, type ActionType } from './components/LeftSidebar';
-import { TopologyMap, type BattleIndicator } from './components/MapView';
-import { NewsFeed } from './components/NewsFeed';
+import type { ActionType } from './components/LeftSidebar';
+import { type BattleIndicator } from './components/MapView';
+import {
+  GameHeader,
+  FactionPanel,
+  CityPanel,
+  ActionsPanel,
+  NewsPanel,
+  StrategicMap,
+} from './components/ui/game';
 import { AdvisorDialog } from './components/AdvisorDialog';
 import { SaveLoadModal } from './components/SaveLoadModal';
 import {
@@ -24,6 +31,7 @@ import {
   shouldShowLoading,
   type GameLoopController,
 } from './systems/gameLoop';
+import { INITIAL_ACTION_POINTS } from './types/gameState';
 import type { GameState, GamePhase } from './types/gameState';
 import type { GameEvent, DomesticEventData } from './types/events';
 import type { General } from './types/general';
@@ -274,13 +282,6 @@ function GameMain() {
   );
 
   /**
-   * 获取势力映射
-   */
-  const getFactionsMap = useCallback(() => {
-    return state.factions;
-  }, [state.factions]);
-
-  /**
    * 获取城市中的武将列表
    */
   const getCityGenerals = useCallback(
@@ -403,6 +404,41 @@ function GameMain() {
     [state.cities, state.generals, state.currentDate, dispatch]
   );
 
+  const playerFaction = state.factions[state.currentFaction];
+  const selectedCityData = state.selectedCity ? state.cities[state.selectedCity] : null;
+  const selectedCityFaction = selectedCityData
+    ? state.factions[selectedCityData.faction]
+    : undefined;
+  const selectedCityGenerals = selectedCityData ? getCityGenerals(selectedCityData.id) : [];
+  const isPlayerCity = selectedCityData ? selectedCityData.faction === state.currentFaction : false;
+
+  const { totalGold, totalGrain, totalTroops } = useMemo(() => {
+    if (!playerFaction) {
+      return { totalGold: 0, totalGrain: 0, totalTroops: 0 };
+    }
+
+    let gold = 0;
+    let grain = 0;
+    let troops = 0;
+
+    for (const cityId of playerFaction.cities) {
+      const city = state.cities[cityId];
+      if (city) {
+        gold += city.resources.gold;
+        grain += city.resources.grain;
+      }
+    }
+
+    for (const generalId of playerFaction.generals) {
+      const general = state.generals[generalId];
+      if (general && general.isAlive) {
+        troops += general.troops;
+      }
+    }
+
+    return { totalGold: gold, totalGrain: grain, totalTroops: troops };
+  }, [playerFaction, state.cities, state.generals]);
+
   // 如果游戏状态未加载，显示加载中
   if (!state.currentFaction) {
     return (
@@ -465,43 +501,53 @@ function GameMain() {
         </div>
       )}
 
-      {/* 三栏布局 */}
-      <div className="game-layout">
-        {/* 左侧栏 */}
-        <LeftSidebar
-          gameState={state}
-          onActionSelect={handleActionSelect}
-          onEndTurn={handleEndTurn}
-          onSave={openSaveModal}
-          onLoad={openLoadModal}
-        />
+      <GameHeader currentTurn={state.currentDate} factionName={playerFaction?.name || '未知势力'} />
 
-        {/* 中央地图 */}
-        <div className="map-container">
-          <div className="map-wrapper">
-            <TopologyMap
-              cities={Object.values(state.cities)}
-              factions={getFactionsMap()}
-              selectedCityId={state.selectedCity}
-              battleIndicators={battleIndicators}
-              onCityHover={() => {}}
-              onCityClick={handleCitySelect}
+      {/* 主游戏区域 */}
+      <div className="game-main">
+        <div className="left-sidebar">
+          {playerFaction && (
+            <FactionPanel
+              faction={playerFaction}
+              actionPoints={state.actionPoints}
+              maxActionPoints={INITIAL_ACTION_POINTS}
+              totalGold={totalGold}
+              totalFood={totalGrain}
+              totalTroops={totalTroops}
             />
-          </div>
+          )}
+
+          {selectedCityData && (
+            <CityPanel
+              city={selectedCityData}
+              faction={selectedCityFaction}
+              generals={selectedCityGenerals}
+            />
+          )}
+
+          <ActionsPanel
+            actionPoints={state.actionPoints}
+            onAction={handleActionSelect}
+            onEndTurn={handleEndTurn}
+            onSave={openSaveModal}
+            onLoad={openLoadModal}
+            hasSelectedCity={!!selectedCityData}
+            isPlayerCity={isPlayerCity}
+          />
         </div>
 
-        {/* 右侧新闻流 */}
-        <div className="news-container">
-          <NewsFeed
-            events={state.eventLog
-              .filter((e) => e.narrative !== undefined)
-              .map((e) => ({
-                id: e.id,
-                type: e.type,
-                narrative: e.narrative!,
-                timestamp: e.timestamp,
-              }))}
+        <div className="map-container">
+          <StrategicMap
+            cities={Object.values(state.cities)}
+            factions={state.factions}
+            selectedCityId={state.selectedCity}
+            battleIndicators={battleIndicators}
+            onCitySelect={(cityId) => handleCitySelect(cityId)}
           />
+        </div>
+
+        <div className="right-sidebar">
+          <NewsPanel events={state.eventLog} />
         </div>
       </div>
 
