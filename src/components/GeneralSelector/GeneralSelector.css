@@ -1,0 +1,199 @@
+/**
+ * 武将选择器样式
+ */
+
+.general-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+}
+
+.general-selector.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* 排序选项 */
+.sort-options {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  flex-wrap: wrap;
+}
+
+.sort-label {
+  font-size: 13px;
+  color: #8b8b8b;
+  margin-right: 4px;
+}
+
+.sort-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: #c0c0c0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sort-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.sort-btn.active {
+  background: linear-gradient(135deg, #8b5a2b, #654321);
+  border-color: #d4a574;
+  color: #ffd700;
+}
+
+.sort-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 武将列表 */
+.generals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  max-height: 280px;
+  padding: 4px;
+}
+
+.generals-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.generals-list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.generals-list::-webkit-scrollbar-thumb {
+  background: rgba(139, 90, 43, 0.6);
+  border-radius: 3px;
+}
+
+.no-generals {
+  text-align: center;
+  color: #8b8b8b;
+  padding: 20px;
+  font-style: italic;
+}
+
+/* 武将卡片 */
+.general-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, rgba(40, 40, 40, 0.9), rgba(30, 30, 30, 0.95));
+  border: 1px solid rgba(139, 90, 43, 0.4);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.general-card:hover {
+  background: linear-gradient(135deg, rgba(50, 50, 50, 0.95), rgba(40, 40, 40, 0.98));
+  border-color: rgba(212, 165, 116, 0.6);
+  transform: translateX(4px);
+}
+
+.general-card.selected {
+  background: linear-gradient(135deg, rgba(139, 90, 43, 0.3), rgba(101, 67, 33, 0.4));
+  border-color: #ffd700;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+}
+
+.general-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.general-card.disabled:hover {
+  transform: none;
+  border-color: rgba(139, 90, 43, 0.4);
+}
+
+/* 武将名称 */
+.general-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #e8d5b7;
+  letter-spacing: 1px;
+}
+
+/* 武将属性 */
+.general-stats {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  color: #b0b0b0;
+}
+
+.stat-icon {
+  font-size: 11px;
+}
+
+/* 兵力显示 */
+.general-troops {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #a0d0a0;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.troops-icon {
+  font-size: 12px;
+}
+
+.troops-value {
+  font-weight: 500;
+}
+
+/* 选中指示器 */
+.selection-indicator {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, #ffd700, #daa520);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #1a1a1a;
+  font-weight: bold;
+}
+
+/* 选择计数 */
+.selection-count {
+  text-align: center;
+  font-size: 13px;
+  color: #8b8b8b;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+}

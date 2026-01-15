@@ -32,7 +32,8 @@
 }
 
 @keyframes battle-pulse {
-  0%, 100% {
+  0%,
+  100% {
     stroke-opacity: 1;
   }
   50% {
@@ -54,17 +55,21 @@
 /* 城市节点样式 */
 .city-node {
   cursor: pointer;
-  transition: transform 0.2s ease;
 }
 
-.city-node:hover {
+.city-node:hover .city-node-circle {
   transform: scale(1.1);
 }
 
 .city-node-circle {
   stroke: #ffffff;
   stroke-width: 2;
-  transition: fill 0.5s ease, stroke-width 0.2s ease;
+  transition:
+    fill 0.5s ease,
+    stroke-width 0.2s ease,
+    transform 0.2s ease;
+  transform-origin: center center;
+  transform-box: fill-box;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
@@ -117,7 +122,6 @@
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
   }
 }
-
 
 /* 城市提示框样式 */
 .city-tooltip {

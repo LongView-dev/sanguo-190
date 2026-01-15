@@ -1,7 +1,7 @@
 /**
  * 三国志：群雄割据 190 - 主应用组件
  * 实现三栏式布局和游戏初始化流程
- * 
+ *
  * Requirements: 1.1, 9.1, 3.5, 11.8
  */
 
@@ -12,6 +12,11 @@ import { TopologyMap, type BattleIndicator } from './components/MapView';
 import { NewsFeed } from './components/NewsFeed';
 import { AdvisorDialog } from './components/AdvisorDialog';
 import { SaveLoadModal } from './components/SaveLoadModal';
+import {
+  DomesticActionModal,
+  type DomesticActionType,
+  type DomesticActionResult,
+} from './components/DomesticActionModal';
 import { SCENARIO_190, createGameStateFromScenario } from './data/scenario190';
 import { storageService } from './services/storageService';
 import {
@@ -20,8 +25,10 @@ import {
   type GameLoopController,
 } from './systems/gameLoop';
 import type { GameState, GamePhase } from './types/gameState';
-import type { GameEvent } from './types/events';
+import type { GameEvent, DomesticEventData } from './types/events';
+import type { General } from './types/general';
 import './App.css';
+import './game.css';
 
 /**
  * 默认玩家势力
@@ -60,6 +67,9 @@ function GameMain() {
   const [showAdvisorDialog, setShowAdvisorDialog] = useState(false);
   const [showSaveLoadModal, setShowSaveLoadModal] = useState(false);
   const [saveLoadMode, setSaveLoadMode] = useState<'save' | 'load'>('save');
+  // 内政对话框状态
+  const [showDomesticModal, setShowDomesticModal] = useState(false);
+  const [domesticActionType, setDomesticActionType] = useState<DomesticActionType | null>(null);
 
   /**
    * 初始化游戏循环控制器
@@ -75,12 +85,12 @@ function GameMain() {
       },
       onEventsAdded: (events: GameEvent[]) => {
         dispatch({ type: 'ADD_EVENTS', payload: events });
-        
+
         // 检查是否有战斗事件，更新战斗指示器
-        const battleEvents = events.filter(e => e.type === 'battle');
+        const battleEvents = events.filter((e) => e.type === 'battle');
         if (battleEvents.length > 0) {
           // 简单实现：显示战斗指示器2秒
-          const indicators: BattleIndicator[] = battleEvents.map(e => ({
+          const indicators: BattleIndicator[] = battleEvents.map((e) => ({
             connectionId: `battle_${e.id}`,
             active: true,
           }));
@@ -96,6 +106,37 @@ function GameMain() {
       },
     });
     setGameLoopController(controller);
+  }, [dispatch]);
+
+  /**
+   * 加载新游戏
+   * Requirements: 9.1
+   */
+  const loadNewGame = useCallback(() => {
+    try {
+      const scenarioData = createGameStateFromScenario(SCENARIO_190, DEFAULT_PLAYER_FACTION);
+      dispatch({
+        type: 'LOAD_SCENARIO',
+        payload: {
+          ...scenarioData,
+          currentFaction: DEFAULT_PLAYER_FACTION,
+        },
+      });
+      setShowOpeningNarrative(true);
+    } catch (error) {
+      console.error('加载游戏失败:', error);
+      // 发生错误时仍然尝试设置基本状态，避免永久加载
+      dispatch({
+        type: 'LOAD_SCENARIO',
+        payload: {
+          currentFaction: DEFAULT_PLAYER_FACTION,
+          cities: {},
+          generals: {},
+          factions: {},
+          currentDate: { year: 190, month: 1 },
+        },
+      });
+    }
   }, [dispatch]);
 
   /**
@@ -115,23 +156,7 @@ function GameMain() {
       // 没有存档，直接加载新游戏
       loadNewGame();
     }
-  }, []);
-
-  /**
-   * 加载新游戏
-   * Requirements: 9.1
-   */
-  const loadNewGame = useCallback(() => {
-    const scenarioData = createGameStateFromScenario(SCENARIO_190, DEFAULT_PLAYER_FACTION);
-    dispatch({
-      type: 'LOAD_SCENARIO',
-      payload: {
-        ...scenarioData,
-        currentFaction: DEFAULT_PLAYER_FACTION,
-      },
-    });
-    setShowOpeningNarrative(true);
-  }, [dispatch]);
+  }, [loadNewGame]);
 
   /**
    * 恢复自动存档
@@ -164,47 +189,53 @@ function GameMain() {
   /**
    * 处理城市选择
    */
-  const handleCitySelect = useCallback((cityId: string | null) => {
-    dispatch({ type: 'SELECT_CITY', payload: cityId });
-  }, [dispatch]);
+  const handleCitySelect = useCallback(
+    (cityId: string | null) => {
+      dispatch({ type: 'SELECT_CITY', payload: cityId });
+    },
+    [dispatch]
+  );
 
   /**
    * 处理动作选择
    */
-  const handleActionSelect = useCallback((action: ActionType) => {
-    // 根据动作类型执行相应逻辑
-    switch (action) {
-      case 'develop_commerce':
-      case 'develop_agriculture':
-      case 'recruit':
-      case 'search_talent':
-        // 内政动作消耗1AP
-        if (state.actionPoints >= 1) {
-          dispatch({ type: 'DEDUCT_AP', payload: 'domestic' });
-          // TODO: 执行具体内政逻辑
-        }
-        break;
-      case 'campaign':
-        // 出征消耗2AP
-        if (state.actionPoints >= 2) {
-          dispatch({ type: 'DEDUCT_AP', payload: 'campaign' });
-          // TODO: 执行出征逻辑
-        }
-        break;
-      case 'view_details':
-        // 查看详情（不消耗AP）
-        // 打开军师对话
-        setShowAdvisorDialog(true);
-        break;
-      case 'stratagem':
-        // 计略（消耗1AP）
-        if (state.actionPoints >= 1) {
-          dispatch({ type: 'DEDUCT_AP', payload: 'domestic' });
-          // TODO: 执行计略逻辑
-        }
-        break;
-    }
-  }, [state.actionPoints, dispatch]);
+  const handleActionSelect = useCallback(
+    (action: ActionType) => {
+      // 根据动作类型执行相应逻辑
+      switch (action) {
+        case 'develop_commerce':
+        case 'develop_agriculture':
+        case 'recruit':
+        case 'search_talent':
+          // 内政动作：需要选择武将，打开对话框
+          if (state.actionPoints >= 1 && state.selectedCity) {
+            setDomesticActionType(action);
+            setShowDomesticModal(true);
+          }
+          break;
+        case 'campaign':
+          // 出征消耗2AP
+          if (state.actionPoints >= 2) {
+            dispatch({ type: 'DEDUCT_AP', payload: 'campaign' });
+            // TODO: 执行出征逻辑
+          }
+          break;
+        case 'view_details':
+          // 查看详情（不消耗AP）
+          // 打开军师对话
+          setShowAdvisorDialog(true);
+          break;
+        case 'stratagem':
+          // 计略（消耗1AP）
+          if (state.actionPoints >= 1) {
+            dispatch({ type: 'DEDUCT_AP', payload: 'domestic' });
+            // TODO: 执行计略逻辑
+          }
+          break;
+      }
+    },
+    [state.actionPoints, state.selectedCity, dispatch]
+  );
 
   /**
    * 处理结束回合
@@ -212,7 +243,7 @@ function GameMain() {
    */
   const handleEndTurn = useCallback(async () => {
     if (!gameLoopController || isLoading) return;
-    
+
     await gameLoopController.endPlayerTurn(state);
   }, [gameLoopController, state, isLoading]);
 
@@ -235,9 +266,12 @@ function GameMain() {
   /**
    * 处理加载存档
    */
-  const handleLoadState = useCallback((loadedState: GameState) => {
-    dispatch({ type: 'LOAD_STATE', payload: loadedState });
-  }, [dispatch]);
+  const handleLoadState = useCallback(
+    (loadedState: GameState) => {
+      dispatch({ type: 'LOAD_STATE', payload: loadedState });
+    },
+    [dispatch]
+  );
 
   /**
    * 获取势力映射
@@ -245,6 +279,129 @@ function GameMain() {
   const getFactionsMap = useCallback(() => {
     return state.factions;
   }, [state.factions]);
+
+  /**
+   * 获取城市中的武将列表
+   */
+  const getCityGenerals = useCallback(
+    (cityId: string): General[] => {
+      const city = state.cities[cityId];
+      if (!city) return [];
+      return city.stationedGenerals
+        .map((id) => state.generals[id])
+        .filter((g): g is General => g !== undefined && g.isAlive);
+    },
+    [state.cities, state.generals]
+  );
+
+  /**
+   * 处理内政执行完成
+   */
+  const handleDomesticExecute = useCallback(
+    (result: DomesticActionResult) => {
+      const city = state.cities[result.cityId];
+      if (!city) return;
+
+      // 扣除行动力
+      dispatch({ type: 'DEDUCT_AP', payload: 'domestic' });
+
+      // 根据动作类型更新状态
+      switch (result.actionType) {
+        case 'develop_commerce':
+          if (result.success && result.value) {
+            dispatch({
+              type: 'UPDATE_CITY',
+              payload: {
+                cityId: result.cityId,
+                updates: {
+                  resources: {
+                    ...city.resources,
+                    gold: city.resources.gold - 100,
+                    commerce: Math.min(999, city.resources.commerce + result.value),
+                  },
+                },
+              },
+            });
+          }
+          break;
+        case 'develop_agriculture':
+          if (result.success && result.value) {
+            dispatch({
+              type: 'UPDATE_CITY',
+              payload: {
+                cityId: result.cityId,
+                updates: {
+                  resources: {
+                    ...city.resources,
+                    gold: city.resources.gold - 100,
+                    agriculture: Math.min(999, city.resources.agriculture + result.value),
+                  },
+                },
+              },
+            });
+          }
+          break;
+        case 'recruit':
+          if (result.success && result.value) {
+            const goldCost = result.value * 2;
+            const popCost = result.value;
+            const general = state.generals[result.generalId];
+            const loyaltyDecrease = Math.max(
+              1,
+              5 - Math.floor((general?.attributes.cha || 0) / 20)
+            );
+
+            dispatch({
+              type: 'UPDATE_CITY',
+              payload: {
+                cityId: result.cityId,
+                updates: {
+                  resources: {
+                    ...city.resources,
+                    gold: city.resources.gold - goldCost,
+                    population: city.resources.population - popCost,
+                    loyalty: Math.max(0, city.resources.loyalty - loyaltyDecrease),
+                  },
+                },
+              },
+            });
+            dispatch({
+              type: 'UPDATE_GENERAL',
+              payload: {
+                generalId: result.generalId,
+                updates: {
+                  troops: (state.generals[result.generalId]?.troops || 0) + result.value,
+                },
+              },
+            });
+          }
+          break;
+        case 'search_talent':
+          // 人才探索成功时，可以添加新武将（简化处理：只添加事件）
+          break;
+      }
+
+      // 添加事件到日志
+      const event: GameEvent = {
+        id: `domestic_${Date.now()}`,
+        type: 'domestic',
+        timestamp: { ...state.currentDate },
+        data: {
+          city: result.cityId,
+          action: result.actionType,
+          executor: result.generalId,
+          value: result.value || 0,
+        } as DomesticEventData,
+        narrative: result.message,
+      };
+      dispatch({ type: 'ADD_EVENT', payload: event });
+
+      // 关闭对话框
+      setShowDomesticModal(false);
+      setDomesticActionType(null);
+    },
+    [state.cities, state.generals, state.currentDate, dispatch]
+  );
 
   // 如果游戏状态未加载，显示加载中
   if (!state.currentFaction) {
@@ -265,19 +422,15 @@ function GameMain() {
             <h2 className="autosave-prompt-title">发现存档</h2>
             <div className="autosave-prompt-info">
               <p>势力：{autoSaveInfo.faction}</p>
-              <p>日期：{autoSaveInfo.date.year}年{autoSaveInfo.date.month}月</p>
+              <p>
+                日期：{autoSaveInfo.date.year}年{autoSaveInfo.date.month}月
+              </p>
             </div>
             <div className="autosave-prompt-buttons">
-              <button
-                className="autosave-prompt-button primary"
-                onClick={restoreAutoSave}
-              >
+              <button className="autosave-prompt-button primary" onClick={restoreAutoSave}>
                 继续游戏
               </button>
-              <button
-                className="autosave-prompt-button secondary"
-                onClick={startNewGame}
-              >
+              <button className="autosave-prompt-button secondary" onClick={startNewGame}>
                 开始新游戏
               </button>
             </div>
@@ -297,10 +450,7 @@ function GameMain() {
                 </p>
               ))}
             </div>
-            <button
-              className="opening-narrative-button"
-              onClick={closeOpeningNarrative}
-            >
+            <button className="opening-narrative-button" onClick={closeOpeningNarrative}>
               开始游戏
             </button>
           </div>
@@ -342,15 +492,15 @@ function GameMain() {
 
         {/* 右侧新闻流 */}
         <div className="news-container">
-          <NewsFeed 
+          <NewsFeed
             events={state.eventLog
-              .filter(e => e.narrative !== undefined)
-              .map(e => ({
+              .filter((e) => e.narrative !== undefined)
+              .map((e) => ({
                 id: e.id,
                 type: e.type,
                 narrative: e.narrative!,
                 timestamp: e.timestamp,
-              }))} 
+              }))}
           />
         </div>
       </div>
@@ -377,6 +527,21 @@ function GameMain() {
         onLoad={handleLoadState}
         mode={saveLoadMode}
       />
+
+      {/* 内政执行对话框 */}
+      {showDomesticModal && domesticActionType && state.selectedCity && (
+        <DomesticActionModal
+          isOpen={showDomesticModal}
+          onClose={() => {
+            setShowDomesticModal(false);
+            setDomesticActionType(null);
+          }}
+          onExecute={handleDomesticExecute}
+          actionType={domesticActionType}
+          city={state.cities[state.selectedCity]}
+          generals={getCityGenerals(state.selectedCity)}
+        />
+      )}
     </div>
   );
 }

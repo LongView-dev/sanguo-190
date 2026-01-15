@@ -2,7 +2,7 @@
  * 游戏循环控制器
  * 整合玩家回合、计算阶段、叙事阶段
  * @module systems/gameLoop
- * 
+ *
  * Requirements: 9.6, 9.7, 9.9
  */
 
@@ -79,7 +79,7 @@ export class GameLoopController {
 
       // 2. 执行AI回合
       const aiResult = executeAITurns(currentState, currentState.currentFaction);
-      
+
       // 应用AI状态更新
       if (aiResult.stateUpdates.length > 0) {
         currentState = applyAIStateUpdates(currentState, aiResult.stateUpdates);
@@ -138,17 +138,14 @@ export class GameLoopController {
 
       // 处理AI事件叙事
       if (aiResult.events.length > 0) {
-        const processedEvents = await this.processNarrativePhase(
-          aiResult.events,
-          currentState
-        );
-        
+        const processedEvents = await this.processNarrativePhase(aiResult.events, currentState);
+
         // 添加事件到日志
         currentState = {
           ...currentState,
           eventLog: [...processedEvents, ...currentState.eventLog],
         };
-        
+
         this.callbacks.onEventsAdded(processedEvents);
       }
 
@@ -165,9 +162,10 @@ export class GameLoopController {
       this.callbacks.onPhaseChange('player');
       this.callbacks.onMonthAdvanced(currentState.currentDate);
       this.callbacks.onStateUpdate(currentState);
-
     } catch (error) {
       console.error('游戏循环处理错误:', error);
+      // 错误时恢复到玩家回合，避免游戏卡住
+      this.callbacks.onPhaseChange('player');
     } finally {
       this.isProcessing = false;
       this.callbacks.onLoadingChange(false, '');
@@ -222,9 +220,7 @@ export class GameLoopController {
 /**
  * 创建游戏循环控制器
  */
-export function createGameLoopController(
-  callbacks: GameLoopCallbacks
-): GameLoopController {
+export function createGameLoopController(callbacks: GameLoopCallbacks): GameLoopController {
   return new GameLoopController(callbacks);
 }
 
